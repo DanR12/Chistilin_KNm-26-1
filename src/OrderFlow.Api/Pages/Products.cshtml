@@ -1,0 +1,24 @@
+@page
+@model OrderFlow.Api.Pages.ProductsModel
+@{
+    ViewData["Title"] = "Products";
+}
+<h1>Products</h1>
+<form method="get" class="searchbar">
+    <div><label for="q">Search</label><input id="q" name="q" value="@Model.Q" placeholder="name or SKU" /></div>
+    <button type="submit" class="secondary">Search</button>
+</form>
+<table>
+    <thead><tr><th>SKU</th><th>Name</th><th class="num">Price</th><th class="num">In stock</th></tr></thead>
+    <tbody>
+    @foreach (var p in Model.Products)
+    {
+        <tr><td>@p.Sku</td><td>@p.Name</td><td class="num">@Money.Fmt(p.Price) €</td><td class="num">@p.Stock</td></tr>
+    }
+    @if (Model.Products.Count == 0)
+    {
+        <tr><td colspan="4" class="muted">No products match "@Model.Q".</td></tr>
+    }
+    </tbody>
+</table>
+<p class="muted">All prices include 20 % VAT.</p>

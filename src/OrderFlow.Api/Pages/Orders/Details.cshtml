@@ -1,0 +1,99 @@
+@page "/Orders/{id:int}"
+@model OrderFlow.Api.Pages.Orders.DetailsModel
+@{
+    ViewData["Title"] = Model.Order.Number;
+    var o = Model.Order;
+}
+<h1>Order @o.Number <span class="badge @o.Status">@o.Status</span></h1>
+<div class="row">
+    <div class="card">
+        <h2>Customer</h2>
+        <p><strong>@o.Customer?.Name</strong> <span class="badge">@o.Customer?.Tier</span><br />@o.Customer?.Email<br />@o.Customer?.FullAddress</p>
+        <h2>Timeline</h2>
+        <p class="muted">
+            Created @o.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC<br />
+            @if (o.PlacedAtUtc is not null) { <text>Placed @o.PlacedAtUtc.Value.ToString("yyyy-MM-dd HH:mm") UTC<br /></text> }
+            @if (o.PaidAtUtc is not null) { <text>Paid @o.PaidAtUtc.Value.ToString("yyyy-MM-dd HH:mm") UTC<br /></text> }
+            @if (o.ShippedAtUtc is not null) { <text>Shipped @o.ShippedAtUtc.Value.ToString("yyyy-MM-dd HH:mm") UTC<br /></text> }
+            @if (o.CancelledAtUtc is not null) { <text>Cancelled @o.CancelledAtUtc.Value.ToString("yyyy-MM-dd HH:mm") UTC<br /></text> }
+            @if (o.PromoCode is not null) { <text>Promo code: @o.PromoCode (@(Model.PromoApplied ? "applied" : "not applicable"))</text> }
+        </p>
+    </div>
+    <div class="card">
+        <h2>Totals</h2>
+        <table class="totals">
+            <tr><td>Subtotal</td><td class="num">@Money.Fmt(Model.Totals.Subtotal) €</td></tr>
+            <tr><td>Discount</td><td class="num">− @Money.Fmt(Model.Totals.Discount) €</td></tr>
+            <tr><td>Shipping</td><td class="num">@(Model.DisplayShipping == 0 ? Html.Raw("<span class=\"free\">free</span>") : Html.Raw(Money.Fmt(Model.DisplayShipping) + " €"))</td></tr>
+            <tr><td>Net</td><td class="num">@Money.Fmt(Model.Totals.Net) €</td></tr>
+            <tr><td>VAT 20 %</td><td class="num">@Money.Fmt(Model.DisplayVat) €</td></tr>
+            <tr class="grand"><td>Total</td><td class="num">@Money.Fmt(Model.DisplayTotal) €</td></tr>
+        </table>
+    </div>
+</div>
+<h2>Lines</h2>
+<table>
+    <thead><tr><th>Product</th><th class="num">Unit price</th><th class="num">Qty</th><th class="num">Line total</th></tr></thead>
+    <tbody>
+    @foreach (var l in o.Lines)
+    {
+        <tr><td>@l.ProductName</td><td class="num">@Money.Fmt(l.UnitPrice) €</td><td class="num">@l.Quantity</td><td class="num">@Money.Fmt(l.LineTotal) €</td></tr>
+    }
+    @if (o.Lines.Count == 0)
+    {
+        <tr><td colspan="4" class="muted">This order has no lines yet.</td></tr>
+    }
+    </tbody>
+</table>
+
+@if (o.Status == OrderStatus.Draft)
+{
+    <div class="card" style="margin-top:16px">
+        <h2>Add a line</h2>
+        <form method="post" asp-page-handler="AddLine">
+            <div class="row">
+                <div>
+                    <label for="ProductId">Product</label>
+                    <select id="ProductId" name="ProductId">
+                        @foreach (var p in Model.Products)
+                        {
+                            <option value="@p.Id">@p.Name — @Money.Fmt(p.Price) € (@p.Stock in stock)</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="Quantity">Quantity</label>
+                    <input id="Quantity" name="Quantity" type="number" min="1" value="1" />
+                </div>
+            </div>
+            <div class="actions"><button type="submit" class="secondary">Add line</button></div>
+        </form>
+    </div>
+}
+
+<div class="actions">
+    @if (o.Status == OrderStatus.Draft)
+    {
+        <form method="post" asp-page-handler="Place"><button type="submit">Place order</button></form>
+        <form method="post" asp-page-handler="Cancel"><button type="submit" class="danger">Cancel order</button></form>
+    }
+    @if (o.Status == OrderStatus.Placed)
+    {
+        <form method="post" asp-page-handler="Pay"><button type="submit">Pay</button></form>
+        <form method="post" asp-page-handler="Cancel"><button type="submit" class="danger">Cancel order</button></form>
+    }
+    @if (o.Status == OrderStatus.Paid)
+    {
+        @if (User.IsInRole("manager"))
+        {
+            <form method="post" asp-page-handler="Ship"><button type="submit">Mark as shipped</button></form>
+        }
+        <a class="btn secondary" href="/Orders/@o.Id/Invoice">View invoice</a>
+        <form method="post" asp-page-handler="Cancel"><button type="submit" class="danger">Cancel order</button></form>
+    }
+    @if (o.Status == OrderStatus.Shipped)
+    {
+        <a class="btn secondary" href="/Orders/@o.Id/Invoice">View invoice</a>
+    }
+    <a class="btn secondary" href="/Orders">Back to list</a>
+</div>

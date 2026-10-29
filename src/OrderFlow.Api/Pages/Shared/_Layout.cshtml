@@ -1,0 +1,58 @@
+@inject VariantOptions Variant
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] is string t ? t + " · OrderFlow" : "OrderFlow")</title>
+    <link rel="stylesheet" href="~/site.css" />
+</head>
+<body>
+<header>
+    <div class="container">
+        <a class="brand" href="/Orders">OrderFlow</a>
+        <a href="/Products">Products</a>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <a href="/Orders">Orders</a>
+            <a href="/Orders/New">New order</a>
+            @if (User.IsInRole("manager"))
+            {
+                <a href="/Customers">Customers</a>
+                <a href="/Outbox">Outbox</a>
+                <a href="/Log">Log</a>
+                <a href="/Support">Support</a>
+            }
+            else
+            {
+                <a href="/Account">My account</a>
+                <a href="/Outbox">Outbox</a>
+            }
+        }
+        <a href="/swagger" target="_blank">API</a>
+        <span class="spacer"></span>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <span class="muted" style="color:#d1d5db">@User.Identity!.Name (@(User.IsInRole("manager") ? "manager" : "customer"))</span>
+            <form method="post" asp-page="/Logout"><button type="submit">Log out</button></form>
+        }
+        else
+        {
+            <a href="/Login">Log in</a>
+        }
+    </div>
+</header>
+<main class="container">
+    @if (TempData["Flash"] is string flash)
+    {
+        <div class="flash">@flash</div>
+    }
+    @if (TempData["Error"] is string err)
+    {
+        <div class="error">@err</div>
+    }
+    @RenderBody()
+</main>
+<footer>OrderFlow 1.1 · build variant @Variant.Number</footer>
+</body>
+</html>

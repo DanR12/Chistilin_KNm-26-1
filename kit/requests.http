@@ -1,0 +1,84 @@
+### OrderFlow — request notebook (VS Code "REST Client" / JetBrains HTTP client)
+### Log in first; the cookie is kept by the client for the following requests.
+
+@base = http://localhost:5000
+
+### Log in as a customer
+POST {{base}}/api/auth/login
+Content-Type: application/json
+
+{ "username": "bob", "password": "bob" }
+
+### Log in as the manager
+POST {{base}}/api/auth/login
+Content-Type: application/json
+
+{ "username": "manager", "password": "manager" }
+
+### Catalogue (no login needed)
+GET {{base}}/api/products
+
+### Catalogue search
+GET {{base}}/api/products?q=desk
+
+### My orders (customers see their own; the manager sees everyone's)
+GET {{base}}/api/orders?page=1&pageSize=10
+
+### Search orders
+GET {{base}}/api/orders?q=OF-2026
+
+### One order
+GET {{base}}/api/orders/2
+
+### A demo order and its invoice (alice's, paid)
+GET {{base}}/api/orders/17
+
+###
+GET {{base}}/api/orders/17/invoice
+
+### Create a draft order (a customer orders for themselves; a manager passes customerId)
+POST {{base}}/api/orders
+Content-Type: application/json
+
+{ "promoCode": null, "lines": [ { "productId": 5, "quantity": 2 }, { "productId": 8, "quantity": 1 } ] }
+
+### Add a line to a draft order
+POST {{base}}/api/orders/17/lines
+Content-Type: application/json
+
+{ "productId": 3, "quantity": 4 }
+
+### Place / pay / ship a draft order
+POST {{base}}/api/orders/17/place
+
+###
+POST {{base}}/api/orders/17/pay
+
+###
+POST {{base}}/api/orders/17/ship
+
+### Invoice of a paid order
+GET {{base}}/api/orders/2/invoice
+
+### Customers (manager)
+GET {{base}}/api/customers
+
+### Change a customer's address
+PUT {{base}}/api/customers/2/address
+Content-Type: application/json
+
+{ "address": "Svobody Ave 10", "city": "Lviv", "country": "Ukraine" }
+
+### --- Release 1.1: diagnostics ---
+
+### Restore the demo data (manager); also clears the outbox and the request log
+POST {{base}}/api/test/reset
+
+### E-mails sent since start-up or the last reset, newest first
+GET {{base}}/api/outbox
+
+### Request log, newest first (manager)
+GET {{base}}/api/log
+
+### Log out
+POST {{base}}/api/auth/logout

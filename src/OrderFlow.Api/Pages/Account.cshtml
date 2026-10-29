@@ -1,0 +1,18 @@
+@page
+@model OrderFlow.Api.Pages.AccountModel
+@{
+    ViewData["Title"] = "My account";
+}
+<h1>My account</h1>
+<div class="card" style="max-width:520px">
+    <p><strong>@Model.Customer.Name</strong> · @Model.Customer.Email · <span class="badge">@Model.Customer.Tier</span></p>
+    <form method="post">
+        <label for="Address">Street address</label>
+        <input id="Address" name="Address" value="@Model.Customer.Address" />
+        <label for="City">City</label>
+        <input id="City" name="City" value="@Model.Customer.City" />
+        <label for="Country">Country</label>
+        <input id="Country" name="Country" value="@Model.Customer.Country" />
+        <div class="actions"><button type="submit">Save address</button></div>
+    </form>
+</div>

@@ -1,0 +1,15 @@
+@page
+@model OrderFlow.Api.Pages.CustomersModel
+@{
+    ViewData["Title"] = "Customers";
+}
+<h1>Customers</h1>
+<table>
+    <thead><tr><th>#</th><th>Name</th><th>E-mail</th><th>Address</th><th>Tier</th></tr></thead>
+    <tbody>
+    @foreach (var c in Model.Customers)
+    {
+        <tr><td>@c.Id</td><td>@c.Name</td><td>@c.Email</td><td>@c.FullAddress</td><td>@c.Tier</td></tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,32 @@
+@page
+@model OrderFlow.Api.Pages.LogModel
+@{
+    ViewData["Title"] = "Request log";
+}
+<h1>Request log</h1>
+<p class="muted">The last @Model.Entries.Count requests, newest first. A failed request carries an error id; the same id is shown to the user on the error page.</p>
+<form method="post" asp-page-handler="Reset" class="actions" style="margin-bottom:14px">
+    <button type="submit" class="danger">Reset demo data</button>
+    <span class="muted">Deletes all orders, customers and products, restores the demo data, and clears the outbox and this log.</span>
+</form>
+<table>
+    <thead><tr><th>#</th><th>Time (UTC)</th><th>User</th><th>Request</th><th class="num">Status</th><th class="num">ms</th><th>Error</th></tr></thead>
+    <tbody>
+    @foreach (var e in Model.Entries)
+    {
+        <tr>
+            <td>@e.Id</td>
+            <td>@e.AtUtc.ToString("HH:mm:ss.fff")</td>
+            <td>@e.User</td>
+            <td><code>@e.Method @e.Path</code></td>
+            <td class="num">@e.Status</td>
+            <td class="num">@e.ElapsedMs</td>
+            <td class="muted">@(e.ErrorId is null ? "" : $"{e.ErrorId}: {e.Error}")</td>
+        </tr>
+    }
+    @if (Model.Entries.Count == 0)
+    {
+        <tr><td colspan="7" class="muted">Nothing logged yet.</td></tr>
+    }
+    </tbody>
+</table>

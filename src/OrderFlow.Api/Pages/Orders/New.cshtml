@@ -1,0 +1,59 @@
+@page
+@model OrderFlow.Api.Pages.Orders.NewModel
+@{
+    ViewData["Title"] = "New order";
+}
+<h1>New order</h1>
+<div class="card" style="max-width:760px">
+    <form method="post" id="new-order">
+        @if (Model.FormToken is not null)
+        {
+            <input type="hidden" name="FormToken" value="@Model.FormToken" />
+        }
+        @if (User.IsInRole("manager"))
+        {
+            <label for="CustomerId">Customer</label>
+            <select id="CustomerId" name="CustomerId">
+                @foreach (var c in Model.Customers)
+                {
+                    <option value="@c.Id">@c.Name (@c.Tier)</option>
+                }
+            </select>
+        }
+        else
+        {
+            <p class="muted">Ordering as <strong>@User.Identity!.Name</strong>.</p>
+        }
+        <label for="PromoCode">Promo code (optional)</label>
+        <input id="PromoCode" name="PromoCode" value="@Model.PromoCode" />
+        <h2>Lines</h2>
+        @for (var i = 0; i < 3; i++)
+        {
+            <div class="row">
+                <div>
+                    <label for="ProductId_@i">Product @(i + 1)</label>
+                    <select id="ProductId_@i" name="ProductId[@i]">
+                        <option value="0">— none —</option>
+                        @foreach (var p in Model.Products)
+                        {
+                            <option value="@p.Id" selected="@(Model.ProductId.Length > i && Model.ProductId[i] == p.Id)">@p.Name — @Money.Fmt(p.Price) € (@p.Stock in stock)</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="Quantity_@i">Quantity</label>
+                    <input id="Quantity_@i" name="Quantity[@i]" type="number" min="1" value="@(Model.Quantity.Length > i && Model.Quantity[i] > 0 ? Model.Quantity[i] : 1)" />
+                </div>
+            </div>
+        }
+        <div class="actions"><button type="submit" id="place">Place order</button><a class="btn secondary" href="/Orders">Cancel</a></div>
+    </form>
+</div>
+@if (Model.FormToken is not null)
+{
+    <script>
+        document.getElementById('new-order').addEventListener('submit', function () {
+            document.getElementById('place').disabled = true;
+        });
+    </script>
+}

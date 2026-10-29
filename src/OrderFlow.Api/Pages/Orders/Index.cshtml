@@ -1,0 +1,41 @@
+@page
+@model OrderFlow.Api.Pages.Orders.IndexModel
+@{
+    ViewData["Title"] = "Orders";
+}
+<h1>Orders</h1>
+<form method="get" class="searchbar">
+    <div><label for="q">Search</label><input id="q" name="q" value="@Model.Q" placeholder="order number or customer" /></div>
+    <button type="submit" class="secondary">Search</button>
+    <a class="btn" href="/Orders/New">New order</a>
+</form>
+<table>
+    <thead><tr><th>Number</th><th>Customer</th><th>Created (UTC)</th><th>Status</th><th class="num">Total</th></tr></thead>
+    <tbody>
+    @foreach (var row in Model.Rows)
+    {
+        <tr>
+            <td><a href="/Orders/@row.Order.Id">@row.Order.Number</a></td>
+            <td>@row.Order.Customer?.Name</td>
+            <td>@row.Order.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm") UTC</td>
+            <td><span class="badge @row.Order.Status">@row.Order.Status</span></td>
+            <td class="num">@Money.Fmt(row.Total) €</td>
+        </tr>
+    }
+    @if (Model.Rows.Count == 0)
+    {
+        <tr><td colspan="5" class="muted">No orders found.</td></tr>
+    }
+    </tbody>
+</table>
+<div class="pager">
+    <span class="muted">Showing @Model.From–@Model.To of @Model.Total</span>
+    @if (Model.PageNumber > 1)
+    {
+        <a class="btn secondary" href="/Orders?q=@Model.Q&page=@(Model.PageNumber - 1)">Previous</a>
+    }
+    @if (Model.PageNumber < Model.TotalPages)
+    {
+        <a class="btn secondary" href="/Orders?q=@Model.Q&page=@(Model.PageNumber + 1)">Next</a>
+    }
+</div>

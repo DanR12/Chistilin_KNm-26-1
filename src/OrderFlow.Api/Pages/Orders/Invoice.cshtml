@@ -1,0 +1,40 @@
+@page "/Orders/{id:int}/Invoice"
+@model OrderFlow.Api.Pages.Orders.InvoiceModel
+@{
+    ViewData["Title"] = "Invoice " + Model.Invoice.Number;
+    var inv = Model.Invoice;
+    var cur = Model.Legacy ? "$" : "€";
+}
+<div class="invoice">
+    <h1>INVOICE</h1>
+    <div class="meta">
+        <div>
+            <strong>OrderFlow Supplies</strong><br />Shevchenka Blvd 1<br />Kyiv, Ukraine<br />VAT ID UA123456789
+        </div>
+        <div>
+            <strong>Invoice no.</strong> @inv.Number<br />
+            <strong>Order no.</strong> @Model.Order.Number<br />
+            <strong>Date</strong> @Model.IssuedText
+        </div>
+    </div>
+    <p><strong>Bill to</strong><br />@Model.BillToName<br />@Model.BillToAddress</p>
+    <table>
+        <thead><tr><th>Item</th><th class="num">Unit price</th><th class="num">Qty</th><th class="num">Amount</th></tr></thead>
+        <tbody>
+        @foreach (var l in Model.Order.Lines)
+        {
+            <tr><td>@l.ProductName</td><td class="num">@Money.Fmt(l.UnitPrice) €</td><td class="num">@l.Quantity</td><td class="num">@Money.Fmt(l.LineTotal) €</td></tr>
+        }
+        </tbody>
+    </table>
+    <table class="totals" style="margin-top:16px">
+        <tr><td>Subtotal</td><td class="num">@Money.Fmt(inv.Subtotal) €</td></tr>
+        <tr><td>Discount</td><td class="num">− @Money.Fmt(inv.Discount) €</td></tr>
+        <tr><td>Shipping</td><td class="num">@Money.Fmt(inv.Shipping) @cur</td></tr>
+        <tr><td>Net amount</td><td class="num">@Money.Fmt(inv.Net) €</td></tr>
+        <tr><td>VAT 20 %</td><td class="num">@Money.Fmt(inv.Vat) €</td></tr>
+        <tr class="grand"><td>@(Model.Legacy ? "Totla due" : "Total due")</td><td class="num">@Money.Fmt(inv.Total) €</td></tr>
+    </table>
+    <p class="muted" style="margin-top:24px">Thank you for your order. Payment received.</p>
+</div>
+<p style="text-align:center;margin-top:16px"><a class="btn secondary" href="/Orders/@Model.Order.Id">Back to order</a></p>

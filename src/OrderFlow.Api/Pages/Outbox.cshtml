@@ -1,0 +1,20 @@
+@page
+@model OrderFlow.Api.Pages.OutboxModel
+@{
+    ViewData["Title"] = "Outbox";
+}
+<h1>Outbox</h1>
+<p class="muted">Copies of the e-mails the application has sent since it started (or since the last reset), newest first.</p>
+<table>
+    <thead><tr><th>#</th><th>Sent (UTC)</th><th>To</th><th>Subject</th><th>Body</th></tr></thead>
+    <tbody>
+    @foreach (var m in Model.Messages)
+    {
+        <tr><td>@m.Id</td><td>@m.SentAtUtc.ToString("yyyy-MM-dd HH:mm:ss")</td><td>@m.To</td><td>@m.Subject</td><td class="muted">@m.Body</td></tr>
+    }
+    @if (Model.Messages.Count == 0)
+    {
+        <tr><td colspan="5" class="muted">No e-mails have been sent yet.</td></tr>
+    }
+    </tbody>
+</table>

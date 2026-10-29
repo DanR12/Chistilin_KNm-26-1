@@ -1,0 +1,12 @@
+@page
+@model OrderFlow.Api.Pages.SupportModel
+@{
+    ViewData["Title"] = "Support inbox";
+    var m = Model.Message;
+}
+<h1>Support inbox</h1>
+<p class="muted">Messages forwarded to the product team by the sales and accounting staff.</p>
+<div class="card" style="max-width:760px">
+    <p><strong>From:</strong> @m.From<br /><strong>Subject:</strong> @m.Subject<br /><strong>Received:</strong> @m.ReceivedAtUtc</p>
+    <pre style="white-space:pre-wrap;font-family:inherit;margin:0">@m.Body</pre>
+</div>
