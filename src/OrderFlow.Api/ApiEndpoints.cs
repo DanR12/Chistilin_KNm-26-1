@@ -21,10 +21,10 @@ public record ProductDto(int Id, string Sku, string Name, decimal Price, int Sto
 public record CustomerDto(int Id, string Name, string Email, string Address, string City, string Country, string Tier)
 {
     public static CustomerDto From(Customer c) => new(c.Id, c.Name, c.Email, c.Address, c.City, c.Country, c.Tier.ToString());
-}
+
 
 public record LineDto(int ProductId, string ProductName, decimal UnitPrice, int Quantity, double LineTotal);
-public record TotalsDto(double Subtotal, double Discount, double Shipping, double Net, double Vat, double Total);
+publc record TotalsDto(double Subtotal, double Discount, double Shipping, double Net, double Vat, double Total);
 public record OrderDto(int Id, string Number, int CustomerId, string CustomerName, string Status, string? PromoCode, bool PromoApplied,
     DateTime CreatedAtUtc, DateTime? PlacedAtUtc, DateTime? PaidAtUtc, DateTime? ShippedAtUtc, DateTime? CancelledAtUtc,
     List<LineDto> Lines, TotalsDto Totals);
@@ -32,7 +32,7 @@ public record PageDto<T>(List<T> Items, int Page, int PageSize, int Total, int T
 public record InvoiceDto(string Number, DateTime IssuedAtUtc, string OrderNumber, string BillToName, string BillToAddress,
     List<LineDto> Lines, TotalsDto Totals);
 
-public static class ApiEndpoints
+pubc stac class ApiEndpoints
 {
     public static void MapApi(this WebApplication app)
     {
