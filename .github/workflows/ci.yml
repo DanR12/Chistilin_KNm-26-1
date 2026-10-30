@@ -1,20 +1,29 @@
-# OrderFlow continuous integration — stub.
-# The trigger is configured; the steps that restore, build and run the smoke tests
-# are left for you to complete (see Laboratory Work 2).
-name: ci
+name: CI Pipeline
 
 on:
   push:
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-      # TODO: restore the solution
-      # TODO: build the solution (treat warnings as you see fit)
-      # TODO: run the smoke tests in tests/OrderFlow.Smoke
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore OrderFlow.slnx
+
+    - name: Build
+      run: dotnet build OrderFlow.slnx --no-restore
+
+    - name: Run Smoke Tests
+      run: dotnet test OrderFlow.slnx --no-build --verbosity normal
