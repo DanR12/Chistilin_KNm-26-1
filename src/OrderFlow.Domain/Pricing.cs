@@ -5,7 +5,7 @@ public sealed class PricingRules
 {
     public decimal DiscountThreshold { get; init; } = 1000m;
     public bool ThresholdInclusive { get; init; }
-    public decimal RegularRate { get; init; } = 0.10m;
+    public decimal RegularRate { get; init; } = 0.25m;
     public decimal VipRate { get; init; } = 0.15m;
     public string PromoCode { get; init; } = "WELCOME";
     public decimal PromoRate { get; init; } = 0.05m;
