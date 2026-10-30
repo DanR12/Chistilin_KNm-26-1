@@ -52,7 +52,7 @@ public static class ApiEndpoints
             return Results.NoContent();
         }).RequireAuthorization();
 
-        api.MapGet("/products", async (string? q, IOrderFlowStore store) =>
+        api.MapGet("/catalog", async (string? q, IOrderFlowStore store) =>
             Results.Ok((await store.SearchProductsAsync(q)).Select(ProductDto.From))).AllowAnonymous();
 
         api.MapGet("/customers", async (IOrderFlowStore store) =>
