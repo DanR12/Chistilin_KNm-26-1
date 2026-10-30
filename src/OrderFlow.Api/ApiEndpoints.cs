@@ -220,7 +220,7 @@ public static class ApiEndpoints
         double vat = (net + shipping) * 0.2;
         return new TotalsDto(subtotal, discount, shipping, net, vat, net + shipping + vat);
     }
-}
+
 
 /// <summary>Translates rule violations into HTTP problem responses.</summary>
 public sealed class DomainErrorFilter : IEndpointFilter
