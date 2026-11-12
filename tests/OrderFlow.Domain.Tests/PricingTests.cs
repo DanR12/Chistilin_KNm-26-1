@@ -1,5 +1,6 @@
 using Xunit;
 using System.Collections.Generic;
+using FluentAssertions;
 
 namespace OrderFlow.Domain.Tests;
 
@@ -16,73 +17,46 @@ public class PricingTests
     [Fact]
     public void Subtotal_is_the_sum_of_quantities_multiplied_by_unit_prices()
     {
-        // Arrange
         var lines = StandardOrder();
-
-        // Act
         var subtotal = Pricing.Subtotal(lines);
-
-        // Assert
-        Assert.Equal(1200.10m, subtotal);
+        subtotal.Should().Be(1200.10m, "subtotal is 2*500 + 1*200.10");
     }
 
     [Fact]
     public void Order_totals_are_computed_correctly_for_regular_customer_without_promo()
     {
-        // Arrange
         var rules = GetDefaultRules();
         var lines = StandardOrder();
         var rounding = System.MidpointRounding.AwayFromZero;
 
-        // Act
         var totals = Pricing.Calculate(lines, CustomerTier.Regular, false, rules, rounding);
 
-        // Assert
-        Assert.Equal(1200.10m, totals.Subtotal);
-        Assert.Equal(120.01m, totals.Discount);
-        Assert.Equal(50.00m, totals.Shipping);
-        Assert.Equal(1130.09m, totals.Net);
-        Assert.Equal(226.02m, totals.Vat);
-        Assert.Equal(1356.11m, totals.Total);
+        totals.Subtotal.Should().Be(1200.10m);
+        totals.Discount.Should().Be(120.01m, "regular tier discount is 10% over 1000 threshold");
+        totals.Shipping.Should().Be(50.00m);
+        totals.Net.Should().Be(1130.09m);
+        totals.Vat.Should().Be(226.02m);
+        totals.Total.Should().Be(1356.11m);
     }
 
-    [Fact]
-    public void Free_shipping_is_applied_when_subtotal_is_over_threshold()
+    [Theory]
+    [InlineData(2000.00, 50.00)]
+    [InlineData(2000.01, 0.00)]
+    public void Shipping_is_free_only_strictly_over_threshold(decimal subtotal, decimal expectedShipping)
     {
-        // Arrange
         var rules = GetDefaultRules();
-        var lines = new List<OrderLine> { new OrderLine { Quantity = 5, UnitPrice = 500.00m } }; // Subtotal 2500
-
-        // Act
-        var shipping = Pricing.ShippingFor(2500.00m, rules);
-
-        // Assert
-        Assert.Equal(0.00m, shipping);
+        var shipping = Pricing.ShippingFor(subtotal, rules);
+        shipping.Should().Be(expectedShipping, "shipping is free only strictly over 2000");
     }
 
-    [Fact]
-    public void Shipping_flat_rate_is_applied_when_subtotal_is_under_threshold()
+    [Theory]
+    [InlineData(1000.00, CustomerTier.Regular, 0.00)]
+    [InlineData(1000.01, CustomerTier.Regular, 0.10)]
+    [InlineData(1000.01, CustomerTier.Vip, 0.15)]
+    public void Discount_rate_depends_on_tier_and_strict_subtotal_threshold(decimal subtotal, CustomerTier tier, decimal expectedRate)
     {
-        // Arrange
         var rules = GetDefaultRules();
-
-        // Act
-        var shipping = Pricing.ShippingFor(1200.10m, rules);
-
-        // Assert
-        Assert.Equal(50.00m, shipping);
-    }
-
-    [Fact]
-    public void Discount_rate_for_regular_customer_over_threshold()
-    {
-        // Arrange
-        var rules = GetDefaultRules();
-
-        // Act
-        var rate = Pricing.DiscountRate(1200.10m, CustomerTier.Regular, false, rules);
-
-        // Assert
-        Assert.Equal(0.10m, rate);
+        var rate = Pricing.DiscountRate(subtotal, tier, false, rules);
+        rate.Should().Be(expectedRate, "threshold is strictly greater than 1000");
     }
 }

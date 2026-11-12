@@ -27,7 +27,7 @@ public static class Pricing
     public static decimal DiscountRate(decimal subtotal, CustomerTier tier, bool promoApplies, PricingRules r)
     {
         decimal rate = OverThreshold(subtotal, r) ? (tier == CustomerTier.VIP ? r.VipRate : r.RegularRate) : 0m;
-        if (promoApplies) rate += r.PromoRate;
+        if (promoApplies) rate = r.PromoRate;
         return rate;
     }
 
