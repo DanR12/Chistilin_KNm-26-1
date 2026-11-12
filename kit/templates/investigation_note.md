@@ -1,7 +1,7 @@
 # Investigation note — <one line: what was reported>
 
 **Report received:** <who, when, their words in quotation marks>
-**Product / build:** OrderFlow 1.1, variant <N>
+**Product / build:** OrderFlow 1.2, variant <N>
 **Started:** <date, time> · **Timebox:** <minutes>
 
 ## The report as an eyewitness account

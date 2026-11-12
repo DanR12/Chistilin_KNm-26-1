@@ -1,6 +1,6 @@
 # <Title: the impact first, about twelve words, no location prefix>
 
-**Version:** OrderFlow 1.1, variant <N>
+**Version:** OrderFlow 1.2, variant <N>
 **Environment:** <browser / OS / how the app was run>
 **Product area:** <page or endpoint>
 **Severity / priority (proposed):** <from the significance table>

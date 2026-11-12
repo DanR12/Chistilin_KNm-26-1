@@ -7,5 +7,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/OrderFlow.Smoke/OrderFlow.Smoke.csproj" />
+    <Project Path="tests/OrderFlow.Domain.Tests/OrderFlow.Domain.Tests.csproj" />
   </Folder>
 </Solution>

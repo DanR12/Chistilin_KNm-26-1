@@ -46,3 +46,7 @@ Release 1.1 contains no functional changes. It adds the diagnostics that were re
 - **Request log.** Every request is recorded with its time, user, status and duration. A request that fails with an internal error receives an *error id*; the id is shown on the error page and next to the request in the log. The log is on the *Log* page and at `GET /api/log` (manager only).
 - **Demo data reset.** `POST /api/test/reset` (manager only), or the *Reset demo data* button on the Log page, deletes all data, restores the demo data and clears the outbox and the log.
 - **Support inbox.** Messages that customers and staff send to the product team are forwarded to the *Support* page (manager only).
+
+## What is new in release 1.2
+
+Release 1.2 contains no functional changes. The source now includes a unit-test project for the pricing rules, `tests/OrderFlow.Domain.Tests`, started by the previous maintainer, and the continuous-integration workflow that runs all tests on every change.

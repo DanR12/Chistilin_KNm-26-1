@@ -1,29 +1,29 @@
-name: CI Pipeline
+# OrderFlow continuous integration.
+# Completed in Laboratory Work 2: restores, builds and runs every test project in the solution
+# on every push and pull request. Release 1.2 ships it as part of the product.
+name: ci
 
 on:
   push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-
-    - name: Restore dependencies
-      run: dotnet restore OrderFlow.slnx
-
-    - name: Build
-      run: dotnet build OrderFlow.slnx --no-restore
-
-    - name: Run Smoke Tests
-      run: dotnet test OrderFlow.slnx --no-build --verbosity normal
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore OrderFlow.slnx
+      - name: Build
+        run: dotnet build OrderFlow.slnx --no-restore --configuration Release
+      - name: Tests
+        run: dotnet test OrderFlow.slnx --no-build --configuration Release --logger "trx;LogFileName=results.trx"
+      - name: Keep the test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/TestResults/*.trx'

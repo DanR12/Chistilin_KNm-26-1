@@ -1,6 +1,6 @@
 # OrderFlow
 
-A small order-and-invoicing service: web interface, REST API, SQLite database. It is the product under test in the laboratory works of the course *Software Testing, Verification, and Validation*. This is release **1.1**.
+A small order-and-invoicing service: web interface, REST API, SQLite database. It is the product under test in the laboratory works of the course *Software Testing, Verification, and Validation*. This is release **1.2**.
 
 ## Run it
 
@@ -33,7 +33,13 @@ docker run -p 5000:5000 -e ORDERFLOW_VARIANT=<your number> orderflow
 dotnet test
 ```
 
-runs the five smoke tests in `tests/OrderFlow.Smoke`. `.github/workflows/ci.yml` is a workflow stub for GitHub Actions: the trigger is configured, the steps are left to complete.
+runs every test project in the solution: the five smoke tests in `tests/OrderFlow.Smoke` and the domain tests in `tests/OrderFlow.Domain.Tests`. To run one project only:
+
+```
+dotnet test tests/OrderFlow.Domain.Tests
+```
+
+`.github/workflows/ci.yml` is the GitHub Actions workflow that runs the same three commands (restore, build, test) on every push and pull request.
 
 ## Accounts
 
@@ -48,12 +54,13 @@ runs the five smoke tests in `tests/OrderFlow.Smoke`. `.github/workflows/ci.yml`
 
 - `src/OrderFlow.Api` — web pages and API (ASP.NET Core)
 - `src/OrderFlow.Application`, `src/OrderFlow.Domain`, `src/OrderFlow.Infrastructure` — the layers behind it
-- `tests/OrderFlow.Smoke` — five smoke tests (`dotnet test`)
-- `.github/workflows/ci.yml` — the CI stub
+- `tests/OrderFlow.Smoke` — five smoke tests through the web host
+- `tests/OrderFlow.Domain.Tests` — the unit tests of the domain (release 1.2: five starter tests)
+- `.github/workflows/ci.yml` — the CI workflow
 - `kit/PRODUCT.md` — the product description
 - `kit/requests.http` — a request notebook for the API
 - `kit/templates/` — investigation note, bug report, significance table, PROOF report, dashboard; and the Lab 1 templates
 
-## New in 1.1
+## New in 1.2
 
-Outbox page and `GET /api/outbox`; request log with error ids on the Log page and `GET /api/log`; `POST /api/test/reset` and a *Reset demo data* button; the Support inbox (manager); five more demo orders. See `kit/PRODUCT.md`.
+No functional changes. The solution now contains `tests/OrderFlow.Domain.Tests`, a unit-test project over `OrderFlow.Domain` with five starter tests, and the CI workflow is complete. Release 1.1 added the Outbox page and `GET /api/outbox`, the request log with error ids and `GET /api/log`, `POST /api/test/reset` and the *Reset demo data* button, the Support inbox (manager) and five more demo orders. See `kit/PRODUCT.md`.
