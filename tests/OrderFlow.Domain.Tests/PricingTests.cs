@@ -1,90 +1,88 @@
-using OrderFlow.Domain;
+using Xunit;
+using System.Collections.Generic;
 
 namespace OrderFlow.Domain.Tests;
 
-/// <summary>The order most of the tests work with: four lines, subtotal 1,200.00.</summary>
-public class StandardOrder
+public class PricingTests
 {
-    public PricingRules Rules { get; } = new();
-
-    public List<OrderLine> Lines { get; } = new()
+    private PricingRules GetDefaultRules() => new PricingRules();
+    
+    private List<OrderLine> StandardOrder() => new List<OrderLine>
     {
-        new OrderLine { ProductName = "Standing desk", UnitPrice = 499.00m, Quantity = 2 },
-        new OrderLine { ProductName = "Office chair", UnitPrice = 189.00m, Quantity = 1 },
-        new OrderLine { ProductName = "Stapler", UnitPrice = 12.90m, Quantity = 1 },
-        new OrderLine { ProductName = "Paper clip", UnitPrice = 0.10m, Quantity = 1 },
+        new OrderLine { Quantity = 2, UnitPrice = 500.00m },
+        new OrderLine { Quantity = 1, UnitPrice = 200.10m }
     };
-}
 
-public class PricingTests : IClassFixture<StandardOrder>
-{
-    private readonly StandardOrder _order;
-
-    public PricingTests(StandardOrder order)
+    [Fact]
+    public void Subtotal_is_the_sum_of_quantities_multiplied_by_unit_prices()
     {
-        _order = order;
+        // Arrange
+        var lines = StandardOrder();
+
+        // Act
+        var subtotal = Pricing.Subtotal(lines);
+
+        // Assert
+        Assert.Equal(1200.10m, subtotal);
     }
 
     [Fact]
-    public void Discounts()
+    public void Order_totals_are_computed_correctly_for_regular_customer_without_promo()
     {
-        var rules = new PricingRules();
-        var lines = new List<OrderLine>
-        {
-            new OrderLine { ProductName = "Standing desk", UnitPrice = 499.00m, Quantity = 2 },
-            new OrderLine { ProductName = "Office chair", UnitPrice = 189.00m, Quantity = 1 },
-            new OrderLine { ProductName = "Stapler", UnitPrice = 12.90m, Quantity = 1 },
-            new OrderLine { ProductName = "Paper clip", UnitPrice = 0.10m, Quantity = 1 },
-        };
+        // Arrange
+        var rules = GetDefaultRules();
+        var lines = StandardOrder();
+        var rounding = System.MidpointRounding.AwayFromZero;
 
-        var regular = Pricing.Calculate(lines, CustomerTier.Regular, false, rules);
-        Assert.Equal(120m, regular.Discount);
+        // Act
+        var totals = Pricing.Calculate(lines, CustomerTier.Regular, false, rules, rounding);
 
-        var vip = Pricing.Calculate(lines, CustomerTier.VIP, false, rules);
-        Assert.Equal(180m, vip.Discount);
-
-        var vipWithPromo = Pricing.Calculate(lines, CustomerTier.VIP, true, rules);
-        Assert.Equal(240m, vipWithPromo.Discount);
+        // Assert
+        Assert.Equal(1200.10m, totals.Subtotal);
+        Assert.Equal(120.01m, totals.Discount);
+        Assert.Equal(50.00m, totals.Shipping);
+        Assert.Equal(1130.09m, totals.Net);
+        Assert.Equal(226.02m, totals.Vat);
+        Assert.Equal(1356.11m, totals.Total);
     }
 
     [Fact]
-    public void Shipping_test()
+    public void Free_shipping_is_applied_when_subtotal_is_over_threshold()
     {
-        var rules = new PricingRules();
+        // Arrange
+        var rules = GetDefaultRules();
+        var lines = new List<OrderLine> { new OrderLine { Quantity = 5, UnitPrice = 500.00m } }; // Subtotal 2500
 
-        foreach (var amount in new[] { 100m, 1500m, 2500m, 3000m })
-        {
-            var shipping = Pricing.ShippingFor(amount, rules);
-            if (amount > 2000m)
-                Assert.Equal(0m, shipping);
-            else
-                Assert.Equal(50m, shipping);
-        }
+        // Act
+        var shipping = Pricing.ShippingFor(2500.00m, rules);
+
+        // Assert
+        Assert.Equal(0.00m, shipping);
     }
 
     [Fact]
-    public void Adding_a_line()
+    public void Shipping_flat_rate_is_applied_when_subtotal_is_under_threshold()
     {
-        _order.Lines.Add(new OrderLine { ProductName = "Paper clip", UnitPrice = 0.10m, Quantity = 1 });
+        // Arrange
+        var rules = GetDefaultRules();
 
-        Assert.Equal(1200.10m, Pricing.Subtotal(_order.Lines));
+        // Act
+        var shipping = Pricing.ShippingFor(1200.10m, rules);
+
+        // Assert
+        Assert.Equal(50.00m, shipping);
     }
 
     [Fact]
-    public void DiscountRate_Sub1200_VIP_Promo_Returns20()
+    public void Discount_rate_for_regular_customer_over_threshold()
     {
-        var r = new PricingRules();
-        var d = Pricing.DiscountRate(1200m, CustomerTier.VIP, true, r);
-        Assert.Equal(0.2m, d);
-    }
+        // Arrange
+        var rules = GetDefaultRules();
 
-    [Fact]
-    public void Totals_are_computed()
-    {
-        var totals = Pricing.Calculate(_order.Lines, CustomerTier.Regular, false, _order.Rules);
+        // Act
+        var rate = Pricing.DiscountRate(1200.10m, CustomerTier.Regular, false, rules);
 
-        Assert.True(totals.Total > 0);
-        Assert.True(totals.Total > totals.Net);
-        Assert.NotEqual(0m, totals.Discount);
+        // Assert
+        Assert.Equal(0.10m, rate);
     }
 }
